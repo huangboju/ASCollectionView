@@ -116,12 +116,12 @@ public class ASCollectionViewLayout: UICollectionViewLayout {
         }
         
         // now add header attributes if it is in rect
-        if headerAttributes != nil && rect.intersects(headerAttributes.frame) == true {
+        if headerAttributes != nil && rect.intersects(headerAttributes.frame) {
             result.append(headerAttributes)
         }
         
         // add more loader attributes if it is in rect
-        if moreLoaderAttributes != nil && rect.intersects(moreLoaderAttributes.frame) == true {
+        if moreLoaderAttributes != nil && rect.intersects(moreLoaderAttributes.frame) {
             result.append(moreLoaderAttributes)
         }
         
