@@ -136,16 +136,17 @@ public class ASCollectionView: UICollectionView, UICollectionViewDataSource {
     // MARK: Key-Value Observer
     
     override public func didChangeValue(forKey key: String) {
-        if key == kContentOffset && self.contentOffset.equalTo(CGPoint.zero) {
-            if ((UIInterfaceOrientationIsPortrait(currentOrientation) && contentOffset.y > (contentSize.height - frame.size.height)) ||
-                (UIInterfaceOrientationIsLandscape(currentOrientation) && contentOffset.x > (contentSize.width - self.frame.size.width))) {
-                    if enableLoadMore == true && !loadingMore {
-                        loadMore()
-                    }
+        guard key == kContentOffset && contentOffset == .zero else {
+            return
+        }
+        if ((UIInterfaceOrientationIsPortrait(currentOrientation) && contentOffset.y > (contentSize.height - frame.size.height)) ||
+            (UIInterfaceOrientationIsLandscape(currentOrientation) && contentOffset.x > (contentSize.width - self.frame.size.width))) {
+            if enableLoadMore && !loadingMore {
+                loadMore()
             }
         }
     }
-    
+
     public func setEnableLoadMore(_ enableLoadMore: Bool) {
         self.enableLoadMore = enableLoadMore
         self.collectionViewLayout.invalidateLayout()
@@ -154,7 +155,7 @@ public class ASCollectionView: UICollectionView, UICollectionViewDataSource {
     // MARK: UICollectionViewDataSource
     
     public func numberOfSections(in collectionView: UICollectionView) -> Int {
-        return 1;
+        return 1
     }
     
     public func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int{
@@ -165,7 +166,7 @@ public class ASCollectionView: UICollectionView, UICollectionViewDataSource {
     }
     
     public func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        if (indexPath as NSIndexPath).row % 10 % 3 == 0 && (indexPath as NSIndexPath).row % 10 / 3 % 2 == 1 {
+        if indexPath.row % 10 % 3 == 0 && indexPath.row % 10 / 3 % 2 == 1 {
             let collectionViewCell: ASCollectionViewParallaxCell
             
             if !collectionView.collectionViewLayout.isKind(of: ASCollectionViewLayout.self) {

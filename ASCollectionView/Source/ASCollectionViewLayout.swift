@@ -21,40 +21,40 @@ public class ASCollectionViewLayout: UICollectionViewLayout {
     /**
       *  Grid cell size. Default value is (200, 100).
      */
-    public var gridCellSize: CGSize!
+    public var gridCellSize = CGSize(width: 200, height: 100)
     
     /**
       *  Parallax cell size. Default value is (400, 200).
      */
-    public var parallaxCellSize: CGSize!
+    public var parallaxCellSize = CGSize(width: 400, height: 200)
     
     /**
       *  Header size. Default value is (200, 200).
       *
       *  Set (0, 0) for no header
      */
-    public var headerSize: CGSize!
+    public var headerSize = CGSize(width: 200, height: 200)
     
     /**
       *  Size for more loader section. Default value is (50, 50).
      */
-    public var moreLoaderSize: CGSize!
+    public var moreLoaderSize = CGSize(width: 50, height: 50)
     
     /**
       *  Space between grid cells. Default value is (10, 10).
      */
-    public var gridCellSpacing: CGSize!
+    public var gridCellSpacing = CGSize(width: 10, height: 10)
     
     /**
       *  Padding for grid. Default value is 20.
      */
-    public var gridPadding: CGFloat! = 20.0
+    public var gridPadding: CGFloat = 20.0
     
     /**
       *  Maximum parallax offset. Default value is 50.
      */
-    public var maxParallaxOffset: CGFloat! = 50.0
-    
+    public var maxParallaxOffset: CGFloat = 50.0
+
     /**
       *  Current orientation, used to layout correctly corresponding to orientation.
      */
@@ -67,24 +67,14 @@ public class ASCollectionViewLayout: UICollectionViewLayout {
     internal var groupSize: CGSize!
     internal var internalGridCellSize: CGSize!
     internal var internalParallaxCellSize: CGSize!
-    internal var previousBoundsSize: CGSize!
-    internal var cellAttributes: NSMutableDictionary!
+    internal var previousBoundsSize = CGSize.zero
+    internal lazy var cellAttributes: [IndexPath: UICollectionViewLayoutAttributes] = [:]
     internal var headerAttributes: UICollectionViewLayoutAttributes!
     internal var moreLoaderAttributes: UICollectionViewLayoutAttributes!
-    
-    required public init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
-        self.setDefaultValues()
-    }
-    
-    override init() {
-        super.init()
-        self.setDefaultValues()
-    }
-    
+
     override public func prepare() {
-        internalGridCellSize = self.gridCellSize
-        internalParallaxCellSize = self.parallaxCellSize
+        internalGridCellSize = gridCellSize
+        internalParallaxCellSize = parallaxCellSize
         
         // Calculate content height
         calculateContentSize()
@@ -97,8 +87,8 @@ public class ASCollectionViewLayout: UICollectionViewLayout {
         // Calculate more loader attributes
         calculateMoreLoaderAttributes()
     }
-    
-    override public var collectionViewContentSize : CGSize {
+
+    override public var collectionViewContentSize: CGSize {
         return contentSize
     }
     
@@ -108,8 +98,8 @@ public class ASCollectionViewLayout: UICollectionViewLayout {
         
         for itemCount in 0 ..< numberOfItems {
             let indexPath = IndexPath(item: itemCount, section: SECTION)
-            let attributes = cellAttributes.object(forKey: indexPath) as! UICollectionViewLayoutAttributes
-            
+            guard let attributes = cellAttributes[indexPath] else { continue }
+
             if rect.intersects(attributes.frame) {
                 result.append(attributes)
             }
@@ -129,21 +119,17 @@ public class ASCollectionViewLayout: UICollectionViewLayout {
     }
     
     override public func layoutAttributesForItem(at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
-        return cellAttributes.object(forKey: indexPath) as? UICollectionViewLayoutAttributes
+        return cellAttributes[indexPath]
     }
     
     override public func layoutAttributesForSupplementaryView(ofKind elementKind: String, at indexPath: IndexPath) -> UICollectionViewLayoutAttributes? {
         return headerAttributes
     }
-    
+
     override public func shouldInvalidateLayout(forBoundsChange newBounds: CGRect) -> Bool {
-        if previousBoundsSize.equalTo(newBounds.size) {
-            previousBoundsSize = newBounds.size
-            return true
-        }
-        return false
+        return previousBoundsSize == newBounds.size
     }
-    
+
     // MARK: Calculation methods
     
     internal func calculateContentSize() {
@@ -236,11 +222,11 @@ public class ASCollectionViewLayout: UICollectionViewLayout {
         
         let numberOfItems = self.collectionView!.numberOfItems(inSection: SECTION)
         
-        cellAttributes = NSMutableDictionary(capacity: numberOfItems)
+        cellAttributes = [:]
         for itemCount in 0 ..< numberOfItems {
             let indexPath = IndexPath(item: itemCount, section: SECTION)
             let attributes = UICollectionViewLayoutAttributes(forCellWith: indexPath)
-            cellAttributes.setObject(attributes, forKey: indexPath as NSCopying)
+            cellAttributes[indexPath] = attributes
         }
         
         var x: CGFloat = self.gridPadding
@@ -256,9 +242,9 @@ public class ASCollectionViewLayout: UICollectionViewLayout {
         for itemCount in 0 ..< numberOfItems {
             let indexInGroup = itemCount % NUMBEROFITEMSINGROUP
             let indexPath = IndexPath(item: itemCount, section: SECTION)
-            let attributes = cellAttributes.object(forKey: indexPath) as! UICollectionViewLayoutAttributes
+            let attributes = cellAttributes[indexPath]
             var frame = CGRect.zero
-            
+
             if UIInterfaceOrientationIsPortrait(self.currentOrientation) {
                 switch (indexInGroup) {
                 case 0:
@@ -342,7 +328,7 @@ public class ASCollectionViewLayout: UICollectionViewLayout {
                     break
                 }
             }
-            attributes.frame = frame
+            attributes?.frame = frame
         }
     }
     
@@ -352,14 +338,14 @@ public class ASCollectionViewLayout: UICollectionViewLayout {
         }
         
         if (headerSize.width == 0 || headerSize.height == 0) {
-            return;
+            return
         }
     
         headerAttributes = UICollectionViewLayoutAttributes(forSupplementaryViewOfKind: ASCollectionViewElement.Header, with: IndexPath(row: 0, section: SECTION))
-        if (UIInterfaceOrientationIsPortrait(currentOrientation)) {
-            headerAttributes.frame = CGRect(x: 0, y: 0, width: self.collectionView!.frame.size.width, height: self.headerSize.height);
+        if UIInterfaceOrientationIsPortrait(currentOrientation) {
+            headerAttributes.frame = CGRect(x: 0, y: 0, width: self.collectionView!.frame.size.width, height: self.headerSize.height)
         } else {
-            headerAttributes.frame = CGRect(x: 0, y: 0, width: self.headerSize.width, height: self.collectionView!.frame.size.height);
+            headerAttributes.frame = CGRect(x: 0, y: 0, width: self.headerSize.width, height: self.collectionView!.frame.size.height)
         }
     }
     
@@ -369,30 +355,18 @@ public class ASCollectionViewLayout: UICollectionViewLayout {
         }
         
         if (self.collectionView as! ASCollectionView).enableLoadMore == false {
-            moreLoaderAttributes = nil;
-            return;
+            moreLoaderAttributes = nil
+            return
         }
         
         let numberOfItems = self.collectionView!.numberOfItems(inSection: SECTION)
         moreLoaderAttributes = UICollectionViewLayoutAttributes(forSupplementaryViewOfKind: ASCollectionViewElement.MoreLoader, with: IndexPath(row: numberOfItems - 1, section: SECTION))
         if (UIInterfaceOrientationIsPortrait(currentOrientation)) {
-            moreLoaderAttributes.frame = CGRect(x: 0, y: contentSize.height - moreLoaderSize.height, width: self.collectionView!.frame.size.width, height: moreLoaderSize.height);
+            moreLoaderAttributes.frame = CGRect(x: 0, y: contentSize.height - moreLoaderSize.height, width: self.collectionView!.frame.size.width, height: moreLoaderSize.height)
         } else {
-            moreLoaderAttributes.frame = CGRect(x: contentSize.width - moreLoaderSize.width, y: 0, width: moreLoaderSize.width, height: self.collectionView!.frame.size.height);
+            moreLoaderAttributes.frame = CGRect(x: contentSize.width - moreLoaderSize.width, y: 0, width: moreLoaderSize.width, height: self.collectionView!.frame.size.height)
         }
     }
     
     // MARK: Set Defaults Values
-    
-    private func setDefaultValues() {
-        self.previousBoundsSize = CGSize.zero;
-        self.gridCellSize = CGSize(width: 200, height: 100)
-        self.parallaxCellSize = CGSize(width: 400, height: 200)
-        self.gridCellSpacing = CGSize(width: 10, height: 10)
-        self.headerSize = CGSize(width: 200, height: 200)
-        self.moreLoaderSize = CGSize(width: 50, height: 50)
-        self.gridPadding = 20.0
-        self.maxParallaxOffset = 50.0
-    }
-
 }
