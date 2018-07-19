@@ -60,7 +60,7 @@ public class ASCollectionViewParallaxCell: UICollectionViewCell {
     private func setUp() {
         currentOrienration = UIInterfaceOrientation.portrait
         parallaxImageView = UIImageView()
-        parallaxImageView.contentMode = UIViewContentMode.scaleAspectFill
+        parallaxImageView.contentMode = .scaleAspectFill
         parallaxImageView.clipsToBounds = true
         parallaxImageView.image = self.parallaxImage
         contentView.insertSubview(parallaxImageView, at: 0)

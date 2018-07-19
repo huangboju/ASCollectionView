@@ -133,7 +133,7 @@ public class ASCollectionViewLayout: UICollectionViewLayout {
     // MARK: Calculation methods
     
     internal func calculateContentSize() {
-        if self.collectionView == nil {
+        if collectionView == nil {
             return
         }
         
@@ -229,8 +229,8 @@ public class ASCollectionViewLayout: UICollectionViewLayout {
             cellAttributes[indexPath] = attributes
         }
         
-        var x: CGFloat = self.gridPadding
-        var y: CGFloat = self.gridPadding
+        var x = self.gridPadding
+        var y = self.gridPadding
         
         // space for header
         if UIInterfaceOrientationIsPortrait(self.currentOrientation) {
